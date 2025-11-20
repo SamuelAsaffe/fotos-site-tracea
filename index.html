@@ -1,24 +1,722 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracea | Rastreabilidade do Nascimento ao Abate</title>
+    <!-- Carrega o Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a fonte Inter --><link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons para ícones -->
+    <script type="module">
+        // Importando os ícones necessários
+        import { createIcons, QrCode, ArrowRight, CheckCircle, Leaf, Factory, Package, Home, Info, Smartphone, Users, Instagram, Briefcase, ArrowUp, Menu, UserCheck, Loader, LogOut, User, Zap, Wrench, Hammer } from 'https://cdn.skypack.dev/lucide';
+        createIcons({ icons: { QrCode, ArrowRight, CheckCircle, Leaf, Factory, Package, Home, Info, Smartphone, Users, Instagram, Briefcase, ArrowUp, Menu, UserCheck, Loader, LogOut, User, Zap, Wrench, Hammer } });
+    </script>
+    <style>
+        /* Configurações de fonte e cores base */
+        :root {
+            --color-primary: #10B981; /* Esmeralda/Verde para confiança e natureza */
+            --color-secondary: #0F172A; /* Slate/Azul escuro para contraste */
+            --color-warning: #F59E0B; /* Laranja para construção/alerta */
+            --color-whatsapp: #25D366; /* Cor do WhatsApp */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            color: var(--color-secondary);
+        }
+        /* Estilo para links de navegação */
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover {
+            color: var(--color-primary);
+        }
+        /* Estilo para o botão primário */
+        .btn-primary {
+            background-color: var(--color-primary);
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            background-color: #059669; /* Um verde um pouco mais escuro */
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            border-bottom: 2px solid var(--color-primary);
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+        /* Estilo para a imagem do fundador */
+        .founder-img {
+            width: 128px; /* w-32 */
+            height: 128px; /* h-32 */
+            object-fit: cover; /* Garante que a imagem preencha o círculo sem distorcer */
+            border-radius: 9999px; /* rounded-full */
+            border: 4px solid var(--color-primary); /* border-4 border-green-600 */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        /* Estilo para o botão "Voltar ao Topo" */
+        #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #back-to-top.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #back-to-top:not(.show) {
+            transform: translateY(20px);
+        }
+        
+        /* Estilo para o NOVO menu de navegação rápido */
+        #quick-nav-menu {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            opacity: 0; /* Oculto por padrão */
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #quick-nav-menu.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #quick-nav-menu:not(.show) {
+            transform: translateY(20px);
+        }
+        
+        /* Ajuste a visibilidade dos links no menu rápido */
+        .quick-nav-links {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+        .quick-nav-links.open {
+            max-height: 200px; /* Suficiente para os 3 links */
+            opacity: 1;
+            margin-bottom: 10px;
+        }
+        .user-id-text {
+            word-break: break-all;
+        }
+
+        /* Estilo para a Modal */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transform: translateY(-50px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal.open .modal-content {
+            transform: translateY(0);
+        }
+        /* Estilo para o botão do Google */
+        .google-btn {
+            background-color: #4285F4;
+            color: white;
+            transition: background-color 0.15s;
+        }
+        .google-btn:hover {
+            background-color: #357ae8;
+        }
+        /* Cor do link no rodapé para o WhatsApp */
+        .footer-whatsapp-link:hover {
+            color: #25D366; /* Cor do WhatsApp para feedback visual */
+        }
+    </style>
 </head>
-<body>
-  <div>
-    <p>Foto Samuel</p>
-    <img src="" alt="">
-  </div>
-  <div>
-    <p>Foto Anna júlia</p>
-    <img src="" alt="">
-  </div>
-  <div>
-    <p>Foto Eduardo</p>
-    <img src="" alt="">
-  </div>
+<body class="bg-white">
+
+    <!-- Navbar Fixa -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Logo/Nome da Empresa -->
+            <a href="#inicio" class="text-3xl font-extrabold text-gray-900 flex items-center">
+                <span class="text-2xl font-bold text-green-600 mr-1">T</span>racea
+            </a>
+
+            <!-- Links de Navegação (Desktop) - APENAS INÍCIO E CONTATO (mantido) -->
+            <nav class="hidden md:flex space-x-8 text-lg font-medium">
+                <a href="#inicio" class="nav-link text-gray-700 border-b-2 border-transparent">Início</a>
+                <a href="#contato" class="nav-link text-gray-700 border-b-2 border-transparent">Contato</a>
+            </nav>
+            
+            <!-- Botão de Perfil/Menu e Botão Mobile -->
+            <div class="flex items-center space-x-4">
+                <!-- Botão de Perfil (NOVO) -->
+                <button id="profile-button" class="text-gray-700 hover:text-green-600 focus:outline-none p-2 rounded-lg transition duration-150">
+                    <i data-lucide="user" class="w-6 h-6"></i>
+                </button>
+                
+                <!-- Botão Mobile -->
+                <div class="md:hidden">
+                    <button id="menu-toggle" class="text-gray-700 hover:text-green-600 focus:outline-none p-2 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu Dropdown Mobile (oculto por padrão) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-inner pb-2">
+            <a href="#inicio" class="block px-4 py-2 text-base text-gray-700 hover:bg-gray-100 hover:text-green-600">Início</a>
+            <a href="#contato" class="block px-4 py-2 text-base text-gray-700 hover:bg-gray-100 hover:text-green-600">Contato</a>
+        </div>
+        
+        <!-- Painel de Status de Autenticação (Mantido para debug) -->
+        <div class="bg-gray-200 py-1 px-4 text-sm flex items-center justify-center space-x-2">
+            <span id="auth-status" class="flex items-center text-gray-600">
+                <i data-lucide="loader" class="w-4 h-4 mr-1 animate-spin"></i>
+                Carregando Autenticação...
+            </span>
+            <span id="user-id-display" class="text-xs text-gray-500 user-id-text"></span>
+        </div>
+    </header>
+
+    <!-- Modal de Perfil/Autenticação (NOVO) -->
+    <div id="auth-modal" class="modal fixed inset-0 flex items-center justify-center z-[5000] hidden opacity-0">
+        <div class="modal-content bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold mb-4 flex items-center text-gray-900">
+                <i data-lucide="user-check" class="w-6 h-6 mr-2 text-green-600"></i>
+                Seu Perfil Tracea
+            </h2>
+            
+            <div id="profile-details" class="space-y-3 mb-6 p-4 bg-gray-50 rounded-lg border">
+                <p class="font-medium text-gray-700">Status:</p>
+                <div id="modal-auth-status" class="text-sm font-semibold text-gray-500 user-id-text">Carregando...</div>
+                
+                <p class="font-medium text-gray-700 pt-2 border-t border-gray-200">ID de Usuário (UID):</p>
+                <div id="modal-user-uid" class="text-xs text-gray-600 user-id-text">...</div>
+            </div>
+
+            <!-- Botão de Login com Google (NOVO) -->
+            <button id="google-login-button" class="google-btn w-full flex items-center justify-center p-3 rounded-xl font-bold shadow-md mb-4">
+                <!-- Ícone SVG do Google (simples) -->
+                <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 7.92-11.303 7.92-6.769 0-12.263-5.494-12.263-12.263s5.494-12.263 12.263-12.263c3.123 0 5.95 1.196 8.12 3.136l5.657-5.657C34.046 5.86 28.598 3.5 24 3.5 12.393 3.5 3.5 12.393 3.5 24s8.893 20.5 20.5 20.5c11.19 0 20.273-8.875 20.273-20.5 0-1.341-.138-2.65-.389-3.917z"/>
+                    <path fill="#FF3D00" d="M6.357 18.031l5.666 3.905c.162.475.284.975.362 1.484 0 4.286 2.76 7.94 6.705 9.155l5.657 5.657C28.598 40.14 24 40.5 24 40.5c-7.234 0-13.88-3.957-17.443-10.457L6.357 18.031z"/>
+                    <path fill="#4CAF50" d="M24 40.5c-7.234 0-13.88-3.957-17.443-10.457L6.357 18.031c.162.475.284.975.362 1.484 0 4.286 2.76 7.94 6.705 9.155l5.657 5.657c2.17 1.94 4.997 3.136 8.12 3.136 5.223 0 9.654-3.263 11.303-7.92H24v-8h18.303v3.917C43.862 25.35 44 26.659 44 28c0 5.484-3.41 10.143-8.232 12.187L28 34.803z"/>
+                    <path fill="#1976D2" d="M12.023 22.067c.162.475.284.975.362 1.484 0 4.286 2.76 7.94 6.705 9.155l5.657 5.657c2.17 1.94 4.997 3.136 8.12 3.136 5.223 0 9.654-3.263 11.303-7.92H24v-8h18.303v3.917C43.862 25.35 44 26.659 44 28c0 5.484-3.41 10.143-8.232 12.187L28 34.803c-3.123 2.83-7.018 4.2-11.303 4.2-4.148 0-8.043-1.37-11.303-4.2l-5.657 5.657C10.12 43.14 16.067 44.5 24 44.5c8.356 0 15.688-4.22 20.273-10.669L43.611 20.083z"/>
+                </svg>
+                Entrar com Google
+            </button>
+            
+            <p class="text-center text-gray-500 mb-6">- ou -</p>
+            
+            <!-- Botões de Ação -->
+            <div class="flex justify-between items-center">
+                <button id="logout-button" class="flex items-center text-red-600 hover:text-red-800 font-medium transition duration-150">
+                    <i data-lucide="log-out" class="w-4 h-4 mr-1"></i>
+                    Sair
+                </button>
+                <button id="close-modal-button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition duration-150">
+                    Fechar
+                </button>
+            </div>
+            
+            <!-- Link de Exemplo para Futuro Cadastro -->
+            <p class="text-center text-sm text-gray-500 mt-6">
+                <!-- Se for usar e-mail/senha, você substituiria esta linha por um formulário -->
+                <span class="text-gray-500 font-medium">
+                    (Futuro: Login com e-mail e senha)
+                </span>
+            </p>
+        </div>
+    </div>
+
+
+    <!-- Seção 1: Início & Missão (Hero) --><section id="inicio" class="relative bg-gray-50 pt-20 pb-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:flex lg:items-center lg:justify-between gap-12">
+                <!-- Conteúdo de Texto --><div class="lg:w-1/2">
+                    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight text-gray-900 mb-6">
+                        Confiança em <span class="text-green-600">Cada Etapa</span>.
+                    </h1>
+                    <!-- TEXTO SOBRE BLOCKCHAIN -->
+                    <p class="text-xl text-gray-600 mb-8 max-w-lg">
+                        A Tracea traz um novo padrão de controle e valorização do rebanho com a rastreabilidade individual de bovinos via blockchain. Cada animal recebe um ID único e inviolável, que registra todo o seu histórico de forma segura, simples e confiável. Isso fortalece a gestão, aumenta a credibilidade na venda e garante informações precisas para apoiar as melhores decisões na fazenda.
+                    </p>
+                    <a href="#como-funciona" class="inline-flex items-center px-8 py-3 text-lg font-semibold rounded-xl text-white btn-primary shadow-lg">
+                        Ver Rastreabilidade <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                    </a>
+                </div>
+
+                <!-- Imagem/Gráfico Mockup --><div class="mt-12 lg:mt-0 lg:w-1/2 flex justify-center">
+                     <!-- Card de Destaque da Jornada --><div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border-b-4 border-green-600">
+                        <h2 class="text-2xl font-bold mb-4 text-gray-900 flex items-center">
+                            <i data-lucide="leaf" class="w-6 h-6 mr-3 text-green-600"></i>
+                            A Jornada da Carne
+                        </h2>
+                        <ul class="space-y-4">
+                            <li class="flex items-center text-gray-700">
+                                <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-600"></i>
+                                Nascimento e Criação (Fazenda)
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-600"></i>
+                                Manejo e Nutrição
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-600"></i>
+                                Transporte e Abate (Frigorífico)
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-600"></i>
+                                Processamento e Embalagem
+                            </li>
+                            <li class="flex items-center text-gray-700 font-bold">
+                                <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-600"></i>
+                                <span class="text-green-600">Sua Mesa (QR Code)</span>
+                            </li>
+                        </ul>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção 2: Como Funciona - Para o Consumidor (QR Code) --><section id="como-funciona" class="py-28 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-16 text-center">
+                <span class="section-header">Rastreabilidade Individual</span>
+            </h2>
+
+            <!-- Grid de Processo --><div class="grid md:grid-cols-3 gap-12">
+                <!-- Passo 1: O QR Code --><div class="text-center p-6 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition duration-300">
+                    <div class="mb-4 inline-block p-4 rounded-full bg-green-100 text-green-600">
+                        <i data-lucide="qr-code" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-gray-900">1. Encontre o QR Code</h3>
+                    <p class="text-gray-600">
+                        Cada corte de carne embalado com a Tracea possui um QR Code único e rastreável. Procure-o na embalagem no momento da compra.
+                    </p>
+                </div>
+
+                <!-- Passo 2: A Câmera --><div class="text-center p-6 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition duration-300">
+                    <div class="mb-4 inline-block p-4 rounded-full bg-green-100 text-green-600">
+                        <i data-lucide="smartphone" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-gray-900">2. Escaneie com o Celular</h3>
+                    <p class="text-gray-600">
+                        Utilize a câmera do seu smartphone (ou um aplicativo leitor de QR Code) para escanear o código na embalagem do produto.
+                    </p>
+                </div>
+
+                <!-- Passo 3: O Histórico Completo --><div class="text-center p-6 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition duration-300">
+                    <div class="mb-4 inline-block p-4 rounded-full bg-green-100 text-green-600">
+                        <i data-lucide="info" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-gray-900">3. Veja a História Completa</h3>
+                    <p class="text-gray-600">
+                        Acesse instantaneamente a ficha completa: data de nascimento, localização das fazendas, certificações, informações sobre o frigorífico e data de abate.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Destaque de Benefício --><div class="mt-20 bg-green-50 p-8 sm:p-12 rounded-2xl border-l-8 border-green-600 shadow-xl">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="mb-6 md:mb-0 md:w-3/4">
+                        <h3 class="text-3xl font-bold text-gray-900 mb-2">Por que a Tracea faz a diferença?</h3>
+                        <p class="text-lg text-gray-700">
+                            A rastreabilidade é a sua garantia de segurança alimentar e de práticas éticas, permitindo que você tome decisões de compra mais informadas.
+                        </p>
+                    </div>
+                    <a href="#inicio" class="w-full md:w-auto flex justify-center px-8 py-3 text-lg font-semibold rounded-xl text-white btn-primary shadow-md">
+                        Nossa Missão
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Seção 3: Nossos Fundadores (NOVA SEÇÃO) --><section id="fundadores" class="py-28 bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-16 text-center">
+                <span class="section-header">Nossos Fundadores</span>
+            </h2>
+
+            <!-- Grid de Fundadores --><div class="grid md:grid-cols-3 gap-10">
+                
+                <!-- Fundador 1: Samuel Asaffe -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl text-center flex flex-col items-center">
+                    <!-- Link RAW CORRIGIDO para Samuel (extensão .jpg) -->
+                    <img src="https://raw.githubusercontent.com/SamuelAsaffe/fotos-site-tracea/main/imagens/foto-samuel.jpg" 
+                         alt="Foto de Samuel Asaffe" 
+                         onerror="this.onerror=null;this.src='https://placehold.co/128x128/10B981/ffffff?text=Samuel';"
+                         class="founder-img">
+                    <h3 class="text-xl font-bold text-gray-900">Samuel Asaffe</h3>
+                    <p class="text-green-600 font-semibold mb-3">Analista de Dados</p>
+                    <a href="https://instagram.com/samuelasaffe" target="_blank" class="text-gray-600 hover:text-green-600 flex items-center transition">
+                        <i data-lucide="instagram" class="w-4 h-4 mr-1"></i>
+                        @samuelasaffe
+                    </a>
+                </div>
+
+                <!-- Fundador 2: Eduardo Marques -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl text-center flex flex-col items-center">
+                    <!-- Link RAW AJUSTADO para Eduardo (extensão .jpeg) -->
+                    <img src="https://raw.githubusercontent.com/SamuelAsaffe/fotos-site-tracea/main/imagens/foto-eduardo.jpeg" 
+                         alt="Foto de Eduardo Marques" 
+                         onerror="this.onerror=null;this.src='https://placehold.co/128x128/10B981/ffffff?text=Eduardo';"
+                         class="founder-img">
+                    <h3 class="text-xl font-bold text-gray-900">Eduardo Marques</h3>
+                    <p class="text-green-600 font-semibold mb-3">Engenheiro Agrônomo</p>
+                    <a href="https://instagram.com/eduardo_m_ara" target="_blank" class="text-gray-600 hover:text-green-600 flex items-center transition">
+                        <i data-lucide="instagram" class="w-4 h-4 mr-1"></i>
+                        @eduardo_m_ara
+                    </a>
+                </div>
+
+                <!-- Fundador 3: Anna Júlia -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl text-center flex flex-col items-center">
+                    <!-- Link RAW AJUSTADO para Anna Júlia (extensão .jpeg) -->
+                    <img src="https://raw.githubusercontent.com/SamuelAsaffe/fotos-site-tracea/main/imagens/foto-anna.jpeg" 
+                         alt="Foto de Anna Júlia" 
+                         onerror="this.onerror=null;this.src='https://placehold.co/128x128/10B981/ffffff?text=Anna';"
+                         class="founder-img">
+                    <h3 class="text-xl font-bold text-gray-900">Anna Júlia</h3>
+                    <p class="text-green-600 font-semibold mb-3">Zootecnista</p>
+                    <a href="https://instagram.com/annajuh_souza" target="_blank" class="text-gray-600 hover:text-green-600 flex items-center transition">
+                        <i data-lucide="instagram" class="w-4 h-4 mr-1"></i>
+                        @annajuh_souza
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    
+    <!-- Seção 4: Em Construção (Mantida, pois foi solicitada anteriormente) -->
+    <section id="em-construcao" class="py-28 bg-yellow-50 text-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="p-8 border-4 border-yellow-500 border-dashed rounded-2xl max-w-2xl mx-auto bg-white shadow-xl">
+                
+                <div class="flex justify-center mb-6 space-x-4">
+                    <!-- Ícone de Zap/Ideia -->
+                    <i data-lucide="zap" class="w-10 h-10 text-yellow-600 animate-pulse"></i>
+                    <!-- Ícone de Wrench/Ferramenta -->
+                    <i data-lucide="wrench" class="w-10 h-10 text-yellow-700"></i>
+                    <!-- Ícone de Martelo -->
+                    <i data-lucide="hammer" class="w-10 h-10 text-yellow-800"></i>
+                </div>
+                
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">
+                    <span class="section-header border-yellow-600">Crescimento em Andamento!</span>
+                </h2>
+
+                <p class="text-xl text-gray-700 mb-6">
+                    Nossa equipe está trabalhando duro para **construir a próxima fase** da Tracea. Estamos integrando novos recursos para levar a transparência e a eficiência do campo à mesa.
+                </p>
+                
+                <p class="text-lg font-semibold text-yellow-700">
+                    Em breve, mais informações e funcionalidades inovadoras. Fique ligado!
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer --><footer id="contato" class="bg-gray-800 text-white py-12 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
+                <!-- Coluna 1: Logo e CNPJ --><div>
+                    <h4 class="text-2xl font-extrabold mb-3 text-green-400">Tracea</h4>
+                    <p class="text-gray-400 text-sm">Transparência e confiança em toda a cadeia bovina.</p>
+                    <p class="text-gray-400 text-sm mt-3 font-medium">CNPJ: 59.760.260/0001-08</p>
+                </div>
+
+                <!-- Coluna 2: Links Rápidos --><div>
+                    <h4 class="text-lg font-semibold mb-3">Mapa do Site</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#inicio" class="text-gray-400 hover:text-green-400 transition">Início / Sobre Nós</a></li>
+                        <li><a href="#como-funciona" class="text-gray-400 hover:text-green-400 transition">Como Funciona o QR Code</a></li>
+                        <li><a href="#fundadores" class="text-gray-400 hover:text-green-400 transition">Fundadores</a></li>
+                        <li><a href="#em-construcao" class="text-gray-400 hover:text-green-400 transition">Em Construção</a></li> <!-- NOVO LINK -->
+                        <li><a href="#" class="text-gray-400 hover:text-green-400 transition">Certificações (Mock)</a></li>
+                    </ul>
+                </div>
+
+                <!-- Coluna 3: Contato (Telefone AGORA É UM LINK) --><div>
+                    <h4 class="text-lg font-semibold mb-3">Fale Conosco</h4>
+                    <p class="text-gray-400 text-sm">contato@tracea.com.br</p>
+                    <!-- O PRÓPRIO NÚMERO É O LINK DO WHATSAPP -->
+                    <p class="text-400 text-sm">
+                        <a href="https://wa.me/5562992210843" target="_blank" class="text-gray-400 hover:text-green-400 transition duration-150 footer-whatsapp-link" aria-label="Fale conosco via WhatsApp">
+                            (62) 9 9221-0843
+                        </a>
+                    </p>
+                    <!-- ENDEREÇO -->
+                    <p class="text-gray-400 text-sm mt-2">Rua do Parque, 361 Quadra 145, Área 3</p>
+                    <p class="text-gray-400 text-sm">Goiânia - GO, CEP 74343-245</p>
+                </div>
+            </div>
+
+            <div class="mt-10 pt-8 border-t border-gray-700 text-center">
+                <p class="text-sm text-gray-500">&copy; <span id="current-year"></span> Tracea. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Botão Voltar ao Topo (NOVO ELEMENTO) -->
+    <button id="back-to-top" aria-label="Voltar ao Topo" class="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-200">
+        <i data-lucide="arrow-up" class="w-6 h-6"></i>
+    </button>
+    
+    <!-- NOVO MENU FLUTUANTE DE NAVEGAÇÃO RÁPIDA (Bottom Left) -->
+    <div id="quick-nav-menu" class="flex flex-col items-start">
+        <!-- Sub-menu de Links (oculto por padrão) -->
+        <div id="quick-nav-links" class="quick-nav-links bg-white p-3 rounded-xl shadow-xl border border-gray-100 mb-2 w-48 space-y-2">
+            <a href="#como-funciona" class="block text-gray-700 hover:text-green-600 text-sm font-medium transition duration-150 py-1" onclick="document.getElementById('quick-nav-button').click()">Para o Consumidor</a>
+            <a href="#fundadores" class="block text-gray-700 hover:text-green-600 text-sm font-medium transition duration-150 py-1" onclick="document.getElementById('quick-nav-button').click()">Nossos Fundadores</a>
+            <a href="#contato" class="block text-gray-700 hover:text-green-600 text-sm font-medium transition duration-150 py-1" onclick="document.getElementById('quick-nav-button').click()">Contato</a>
+        </div>
+        
+        <!-- Botão principal do menu rápido -->
+        <button id="quick-nav-button" aria-label="Menu de Navegação Rápida" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-400 transition duration-200 flex items-center">
+            <i data-lucide="menu" class="w-6 h-6 mr-2"></i> Menu Rápido
+        </button>
+    </div>
+
+
+    <script type="module">
+        // Importa as funções necessárias do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // --- VARIÁVEIS GLOBAIS ---
+        const authStatusElement = document.getElementById('auth-status');
+        const userIdDisplayElement = document.getElementById('user-id-display');
+        const modalAuthStatusElement = document.getElementById('modal-auth-status');
+        const modalUserUidElement = document.getElementById('modal-user-uid');
+        const profileButton = document.getElementById('profile-button');
+        const googleLoginButton = document.getElementById('google-login-button'); // NOVO BOTÃO
+        let auth; // Variável global para a instância de autenticação
+
+        // --- INICIALIZAÇÃO E AUTENTICAÇÃO DO FIREBASE ---
+
+        try {
+            // 1. Configurações e Inicialização
+            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app); // Atribui a instância à variável global
+            
+            // 2. Listener de Status de Autenticação
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // Usuário Autenticado
+                    const uid = user.uid;
+                    authStatusElement.innerHTML = '<i data-lucide="user-check" class="w-4 h-4 mr-1 text-green-600"></i> Autenticado';
+                    userIdDisplayElement.textContent = `UID: ${uid}`;
+                    modalAuthStatusElement.innerHTML = '<span class="text-green-600">Conectado</span>';
+                    modalUserUidElement.textContent = uid;
+                    // Recria ícones se necessário (pode não ser necessário em todos os ambientes)
+                    if (window.createIcons) window.createIcons({ icons: { UserCheck } });
+                } else {
+                    // Usuário Desconectado
+                    authStatusElement.innerHTML = '<i data-lucide="user-x" class="w-4 h-4 mr-1 text-red-600"></i> Não Autenticado';
+                    userIdDisplayElement.textContent = 'Anonimo';
+                    modalAuthStatusElement.innerHTML = '<span class="text-red-600">Desconectado</span>';
+                    modalUserUidElement.textContent = 'Faça login para ter um perfil persistente.';
+                }
+            });
+
+            // 3. Processo de Autenticação Inicial (Anônimo / Custom Token)
+            async function authenticate() {
+                authStatusElement.innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-1 animate-spin"></i> Conectando...';
+
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            }
+            
+            authenticate().catch(error => {
+                console.error("Erro na autenticação Firebase:", error);
+                authStatusElement.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 mr-1 text-red-600"></i> Erro de Auth';
+                userIdDisplayElement.textContent = "Verifique o console.";
+            });
+
+        } catch (e) {
+            console.error("Erro ao inicializar Firebase:", e);
+            authStatusElement.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 mr-1 text-red-600"></i> Configuração Inválida';
+        }
+        
+        // --- FUNÇÃO DE LOGIN COM GOOGLE ---
+        googleLoginButton.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                // Abre a janela pop-up do Google para login
+                await signInWithPopup(auth, provider);
+                console.log("Login com Google bem-sucedido!");
+                closeModal();
+            } catch (error) {
+                console.error("Erro ao fazer login com Google:", error);
+                // Tratar erros, como pop-up bloqueado ou usuário cancelando.
+                // Aqui você pode adicionar uma mensagem de erro na modal se quiser.
+            }
+        });
+
+        
+        // --- LÓGICA DO MODAL DE PERFIL ---
+        
+        const authModal = document.getElementById('auth-modal');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const logoutButton = document.getElementById('logout-button');
+
+        // Abre a modal
+        profileButton.addEventListener('click', () => {
+            authModal.classList.remove('hidden');
+            // Força o reflow para aplicar a transição de opacidade/transform
+            setTimeout(() => {
+                authModal.classList.add('open');
+                authModal.style.opacity = '1';
+            }, 10); 
+        });
+
+        // Fecha a modal
+        function closeModal() {
+            authModal.classList.remove('open');
+            authModal.style.opacity = '0';
+            setTimeout(() => {
+                authModal.classList.add('hidden');
+            }, 300); // Esconde depois da transição
+        }
+        
+        // Listeners para fechar a modal
+        closeModalButton.addEventListener('click', closeModal);
+        authModal.addEventListener('click', (e) => {
+            // Fecha se clicar fora do conteúdo
+            if (e.target === authModal) {
+                closeModal();
+            }
+        });
+        
+        // Lógica de Logout
+        logoutButton.addEventListener('click', async () => {
+            if (auth) {
+                try {
+                    await signOut(auth);
+                    console.log("Logout bem-sucedido.");
+                    closeModal();
+                } catch (error) {
+                    console.error("Erro ao fazer logout:", error);
+                }
+            }
+        });
+
+
+        // Lógica para o botão "Voltar ao Topo"
+        const backToTopButton = document.getElementById('back-to-top');
+        const scrollThreshold = 300; // Distância de rolagem em pixels para o botão aparecer
+
+        // Lógica para o NOVO Menu Rápido
+        const quickNavMenu = document.getElementById('quick-nav-menu');
+        const quickNavButton = document.getElementById('quick-nav-button');
+        const quickNavLinks = document.getElementById('quick-nav-links');
+        const inicioSection = document.getElementById('inicio');
+
+        // Observer para verificar se a seção 'Início' está visível (para mostrar o menu rápido)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // A seção Início está visível, mostra o menu rápido
+                    quickNavMenu.classList.add('show');
+                } else {
+                    // Seção Início não está visível, esconde o menu rápido e seus links
+                    quickNavMenu.classList.remove('show');
+                    quickNavLinks.classList.remove('open');
+                }
+            });
+        }, { threshold: 0.1 }); // Dispara quando 10% da seção Início está visível
+
+        // Observa a seção Início
+        observer.observe(inicioSection);
+        
+        // Listener para abrir/fechar o sub-menu rápido
+        quickNavButton.addEventListener('click', () => {
+            quickNavLinks.classList.toggle('open');
+        });
+        
+        // --- Lógicas Existentes ---
+        
+        // Função para mostrar ou esconder o botão Voltar ao Topo
+        function toggleBackToTop() {
+            if (window.scrollY > scrollThreshold) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        }
+
+        // Função para rolar suavemente para o topo
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Listener de rolagem para mostrar/esconder o botão Voltar ao Topo
+        window.addEventListener('scroll', toggleBackToTop);
+
+        // Listener de clique para rolar ao topo
+        backToTopButton.addEventListener('click', scrollToTop);
+        
+        // Lógica simples para o menu mobile
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Fecha o menu mobile ao clicar em um link
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Define o ano atual no footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Implementação de Scroll Suave para navegadores mais antigos (modernos já suportam no CSS)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            // CORREÇÃO: Usar a variável 'anchor' dentro do listener e remover a linha de erro.
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                
+                // --- CORREÇÃO AQUI: Garante que o LOGO e o INÍCIO sempre voltem ao topo. ---
+                if (href === '#inicio') {
+                    scrollToTop(); // Chama a função de rolagem suave para o topo
+                    return; // Sai do listener
+                }
+
+                // Lógica original para rolagem de outras seções
+                if (href.startsWith('#')) {
+                    document.querySelector(href).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+    </script>
 </body>
-
-
 </html>
